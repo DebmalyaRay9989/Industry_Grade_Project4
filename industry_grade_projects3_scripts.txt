@@ -1,0 +1,878 @@
+KPIs (Both on real-time data and batch-processed data)
+• Total numbers of cases
+• Total open cases in the last 1 hour
+• Total closed cases in the last 1 hour
+• Total priority cases
+4
+• Total positive/negative responses in the last 1 hour
+• Total number of surveys in the last 1 hour
+• Total open cases in a day/week/month
+• Total closed cases in a day/week/month
+• Total positive/negative responses in a day/week/month
+• Total number of surveys in a day/week/month
+Real-time KPIs
+• Total numbers of cases that are open and closed out of the number of cases received
+• Total number of cases received based on priority and severity
+
+*********************************************************************************************************************************************
+
+Sales transaction data does not have sales price information. It just has itemID, store_id, date and
+units sold
+• To fetch the sales price, we need to join it with the price change events table
+
+• One price change creates two ranges. scandate + scantime in a sales transaction can belong to any
+of these ranges to get the sales price
+
+• In the below example, the sales price for the sales transaction as per price change event will be
+16.17
+
+********************************************************************************************************************************************
+
+Customer Retention Strategy
+==============================
+
+[edureka_918210@ip-20-0-41-164 batchdata]$ hadoop fs -ls /user/edureka_918210/project_futurecart/batchdata
+Found 10 items
+-rw-r--r--   3 edureka_918210 hadoop    1822863 2021-01-14 14:07 /user/edureka_918210/project_futurecart/batchdata/futurecart_calendar_details.txt
+-rw-r--r--   3 edureka_918210 hadoop        864 2021-01-14 14:07 /user/edureka_918210/project_futurecart/batchdata/futurecart_call_center_details.txt
+-rw-r--r--   3 edureka_918210 hadoop        965 2021-01-14 14:07 /user/edureka_918210/project_futurecart/batchdata/futurecart_case_category_details.txt
+-rw-r--r--   3 edureka_918210 hadoop       4231 2021-01-14 14:07 /user/edureka_918210/project_futurecart/batchdata/futurecart_case_country_details.txt
+-rw-r--r--   3 edureka_918210 hadoop   75311462 2021-01-14 14:07 /user/edureka_918210/project_futurecart/batchdata/futurecart_case_details.txt
+-rw-r--r--   3 edureka_918210 hadoop        523 2021-01-14 14:07 /user/edureka_918210/project_futurecart/batchdata/futurecart_case_priority_details.txt
+-rw-r--r--   3 edureka_918210 hadoop   18320270 2021-01-14 14:07 /user/edureka_918210/project_futurecart/batchdata/futurecart_case_survey_details.txt
+-rw-r--r--   3 edureka_918210 hadoop   24342084 2021-01-14 14:07 /user/edureka_918210/project_futurecart/batchdata/futurecart_employee_details.txt
+-rw-r--r--   3 edureka_918210 hadoop    5564844 2021-01-14 14:07 /user/edureka_918210/project_futurecart/batchdata/futurecart_product_details.txt
+-rw-r--r--   3 edureka_918210 hadoop        597 2021-01-14 14:07 /user/edureka_918210/project_futurecart/batchdata/futurecart_survey_question_details.txt
+[edureka_918210@ip-20-0-41-164 batchdata]$ 
+
+###########################################################################################################################################
+
+
+###########################################################################################################################################
+[edureka_918210@ip-20-0-41-62 project_retailcart]$ hadoop fs -ls /bigdatapgp/common_folder/project_retailcart/realtimedata
+Found 2 items
+-rw-r--r--   3 evaluationuser01 supergroup      41546 2020-07-27 09:56 /bigdatapgp/common_folder/project_retailcart/realtimedata/price_change_event.txt
+-rw-r--r--   3 evaluationuser01 supergroup       5029 2020-07-27 16:42 /bigdatapgp/common_folder/project_retailcart/realtimedata/real_time_simulator.py
+[edureka_918210@ip-20-0-41-62 project_retailcart]$ 
+###########################################################################################################################################
+
+
+###########################################################################################################################################
+
+import org.apache.spark.ml.classification.LogisticRegression
+import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
+import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
+import org.apache.spark.ml.linalg.DenseVector
+import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
+import org.apache.spark.sql.SparkSession
+import org.apache.log4j.Logger
+import org.apache.log4j.Level
+import org.apache.spark.ml.feature.{HashingTF, IDF, Tokenizer}
+import org.apache.spark.ml.feature.QuantileDiscretizer
+import org.apache.spark.sql.types._
+import org.apache.spark.ml.classification.LogisticRegression
+import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
+import org.apache.spark.ml.feature.{StringIndexer, VectorAssembler}
+import org.apache.spark.ml.feature.{HashingTF, IDF, Tokenizer} 
+import org.apache.spark.ml.linalg.DenseVector
+import org.apache.spark.mllib.evaluation.BinaryClassificationMetrics
+import org.apache.spark.sql.SparkSession
+import org.apache.log4j.Logger
+import org.apache.log4j.Level
+import org.apache.spark.ml.feature.{HashingTF, IDF, Tokenizer}
+import org.apache.spark.ml.feature.QuantileDiscretizer
+import org.apache.spark.sql.types._
+import org.apache.spark.ml.feature.MinMaxScaler 
+import org.apache.spark.ml.linalg.Vectors 
+import org.apache.spark.ml.classification.RandomForestClassifier
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+import org.apache.spark.ml.feature.StringIndexer
+import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.ml.classification.RandomForestClassifier
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+import org.apache.spark.ml.feature.StringIndexer
+import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.sql.functions._ 
+import org.apache.spark.ml.feature.{OneHotEncoder, StringIndexer}
+import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+import org.apache.spark.ml.feature.{IndexToString, StringIndexer, VectorIndexer}
+
+import org.apache.spark.ml.evaluation.RegressionEvaluator
+import org.apache.spark.ml.regression.LinearRegression
+import org.apache.spark.ml.tuning.{ParamGridBuilder,TrainValidationSplit}
+import org.apache.log4j._
+import org.apache.spark.ml.feature.VectorAssembler
+import org.apache.spark.mllib.linalg.Vectors
+
+import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.classification.LogisticRegression
+import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
+import org.apache.spark.ml.feature.{HashingTF, Tokenizer}
+import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
+import org.apache.spark.sql.Row
+// $example off$
+import org.apache.spark.sql.SparkSession
+
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.{StructType, StructField, StringType};
+
+==========================================================================================================================================================================
+
+futurecart_calendar_details
+==============================
+
+futurecart_calendar_details.txt
+
+calendar_date   date_desc       week_day_nbr    week_number     week_name       year_week_number        month_number    month_name      quarter_number  quarter_nam
+e       half_year_number        half_year_name  geo_region_cd
+
+spark.read.textFile("/user/edureka_918210/project_futurecart/batchdata/futurecart_calendar_details.txt").createOrReplaceTempView("futurecart_calendar_details");
+
+2011-02-20      Sunday, February 20, 2011       2       4       Week 04 201104  1       February        1       Q1      1       1st Half        US
+
+val futurecart_calendar_details = 
+spark.sql(""" Select 
+split(value,'\t')[0] as calendar_date,
+split(value,'\t')[1] as date_desc,
+split(value,'\t')[2] as week_day_nbr,
+split(value,'\t')[3] as week_number,
+split(value,'\t')[4] as week_name,
+split(value,'\t')[5] as year_week_number,
+split(value,'\t')[6] as month_number,
+split(value,'\t')[7] as month_name,
+split(value,'\t')[8] as quarter_number,
+split(value,'\t')[9] as quarter_name,
+split(value,'\t')[10] as half_year_number,
+split(value,'\t')[11] as half_year_name,
+split(value,'\t')[12] as geo_region_cd
+from futurecart_calendar_details """)
+
+
+val futurecart_calendar2 = futurecart_calendar_details.selectExpr("calendar_date", "date_desc", "cast(week_day_nbr as integer) week_day_nbr", "week_number", "week_name", "cast(year_week_number as integer) year_week_number","month_number","month_name","quarter_number","quarter_name","half_year_number","half_year_name","geo_region_cd")
+
+futurecart_call_center_details.txt
+==================================
+
+call_center_id  call_center_vendor      location        country
+
+spark.read.textFile("/user/edureka_918210/project_futurecart/batchdata/futurecart_call_center_details.txt").createOrReplaceTempView("futurecart_call_center_details");
+
+
+val futurecart_call_center_details = 
+spark.sql(""" Select 
+split(value,'\t')[0] as call_center_id,
+split(value,'\t')[1] as call_center_vendor,
+split(value,'\t')[2] as location,
+split(value,'\t')[3] as country
+from futurecart_call_center_details """)
+
+val futurecart_call_center_details2 = futurecart_call_center_details.selectExpr("cast(call_center_id as integer) call_center_id", "call_center_vendor", "location", "country")
+
+
+futurecart_case_category_details.txt
+======================================
+
+category_key    sub_category_key        category_description    sub_category_description        priority
+CAT1    SCAT1   Subscription    Renewal P1
+CAT1    SCAT2   Subscription    Termination     P6
+
+spark.read.textFile("/user/edureka_918210/project_futurecart/batchdata/futurecart_case_category_details.txt").createOrReplaceTempView("futurecart_case_category_details");
+
+val futurecart_case_category_details = 
+spark.sql(""" Select 
+split(value,'\t')[0] as category_key,
+split(value,'\t')[1] as sub_category_key,
+split(value,'\t')[2] as category_description,
+split(value,'\t')[3] as priority
+from futurecart_case_category_details """)
+
+
+
+val futurecart_case_category_details2 = futurecart_case_category_details.selectExpr("category_key", "sub_category_key", "category_description", "priority")
+
+
+futurecart_case_country_details.txt
+======================================
+id      name    alpha_2 alpha_3
+
+spark.read.textFile("/user/edureka_918210/project_futurecart/batchdata/futurecart_case_country_details.txt").createOrReplaceTempView("futurecart_case_country_details");
+
+val futurecart_case_country_details = 
+spark.sql(""" Select 
+split(value,'\t')[0] as id,
+split(value,'\t')[1] as name,
+split(value,'\t')[2] as alpha_2,
+split(value,'\t')[3] as alpha_3
+from futurecart_case_country_details """)
+
+val futurecart_case_country_details2 = futurecart_case_country_details.selectExpr("cast(id as integer) id", "name", "alpha_2", "alpha_3")
+
+
+
+futurecart_case_details.txt
+======================================
+|case_no        create_timestamp        last_modified_timestamp created_employee_key    call_center_id  status  category        sub_category    communication_modec
+ountry_cd       product_code|
+
+2024    2020-04-20 01:01:29     2020-04-20 01:01:29     274649  C-104   Open    CAT1    SCAT1   Email   PY      997719
+
+
+spark.read.textFile("/user/edureka_918210/project_futurecart/batchdata/futurecart_case_details.txt").createOrReplaceTempView("futurecart_case_details");
+
+val futurecart_case_details = 
+spark.sql(""" Select 
+split(value,'\t')[0] as case_no,
+split(value,'\t')[1] as create_timestamp,
+split(value,'\t')[2] as last_modified_timestamp,
+split(value,'\t')[3] as created_employee_key,
+split(value,'\t')[4] as call_center_id,
+split(value,'\t')[5] as status,
+split(value,'\t')[6] as category,
+split(value,'\t')[7] as sub_category,
+split(value,'\t')[8] as communication_mode,
+split(value,'\t')[9] as country_cd,
+split(value,'\t')[10] as product_code
+from futurecart_case_details """)
+
+val futurecart_case_details2 = futurecart_case_details.selectExpr("cast(case_no as integer) case_no", "create_timestamp", "last_modified_timestamp", "cast(created_employee_key as integer) created_employee_key","call_center_id","status","category","sub_category","communication_mode","country_cd","product_code")
+
+
+futurecart_case_priority_details.txt
+======================================
+
+priority_key    priority        severity        SLA
+
+P1      Highest  Critical        1
+
+spark.read.textFile("/user/edureka_918210/project_futurecart/batchdata/futurecart_case_priority_details.txt").createOrReplaceTempView("futurecart_case_priority_details");
+
+val futurecart_case_priority_details = 
+spark.sql(""" Select 
+split(value,'\t')[0] as priority_key,
+split(value,'\t')[1] as priority,
+split(value,'\t')[2] as severity,
+split(value,'\t')[3] as SLA
+from futurecart_case_priority_details """)
+
+val futurecart_case_priority_details2 = futurecart_case_priority_details.selectExpr("priority_key", "priority", "severity", "SLA")
+
+
+futurecart_case_survey_details.txt
+===================================
+
+/user/edureka_918210/project_futurecart/batchdata/futurecart_case_survey_details.txt
+
+spark.read.textFile("/user/edureka_918210/project_futurecart/batchdata/futurecart_case_survey_details.txt").createOrReplaceTempView("futurecart_case_survey_details");
+
+survey_id       case_no survey_timestamp        q1      q2      q3      q4      q5
+S-1000  130114  2020-04-26 00:08:28     2       7       1       N       7
+
+
+val futurecart_case_survey_details = 
+spark.sql(""" Select 
+split(value,'\t')[0] as survey_id,
+split(value,'\t')[1] as case_no,
+split(value,'\t')[2] as survey_timestamp,
+split(value,'\t')[3] as q1,
+split(value,'\t')[4] as q2,
+split(value,'\t')[5] as q3,
+split(value,'\t')[6] as q4,
+split(value,'\t')[7] as q5
+from futurecart_case_survey_details """)
+
+val futurecart_case_survey_details2 = futurecart_case_survey_details.selectExpr("survey_id", "case_no", "survey_timestamp", "q1", "q2", "q3", "q4", "q5")
+
+futurecart_employee_details.txt
+===================================
+
+/user/edureka_918210/project_futurecart/batchdata/futurecart_employee_details.txt
+
+
+spark.read.textFile("/user/edureka_918210/project_futurecart/batchdata/futurecart_employee_details.txt").createOrReplaceTempView("futurecart_employee_details");
+
+emp_key first_name      last_name       email   gender  ldap    hire_date       manager
+10001   Georgi  Facello Georgi.Facello01@testmail.com   M       5941CF7D        2014-04-06  
+
+val futurecart_employee_details = 
+spark.sql(""" Select 
+split(value,'\t')[0] as emp_key,
+split(value,'\t')[1] as first_name,
+split(value,'\t')[2] as last_name,
+split(value,'\t')[3] as email,
+split(value,'\t')[4] as gender,
+split(value,'\t')[5] as ldap,
+split(value,'\t')[6] as hire_date,
+split(value,'\t')[7] as manager
+from futurecart_employee_details """)
+
+val futurecart_employee_details2 = futurecart_employee_details.selectExpr("cast(emp_key as integer) emp_key", "first_name", "last_name", "email", "gender", "ldap", "hire_date", "manager")
+
+futurecart_product_details.txt
+===================================
+
+/user/edureka_918210/project_futurecart/batchdata/futurecart_product_details.txt
+
+spark.read.textFile("/user/edureka_918210/project_futurecart/batchdata/futurecart_product_details.txt").createOrReplaceTempView("futurecart_product_details");
+
+product_id      department      brand   commodity_desc  sub_commodity_desc
+25671   GROCERY National        FRZN ICE        ICE - CRUSHED/CUBED
+26081   MISC. TRANS.    National        NO COMMODITY DESCRIPTION        NO SUBCOMMODITY DESCRIPTION
+
+
+val futurecart_product_details = 
+spark.sql(""" Select 
+split(value,'\t')[0] as product_id,
+split(value,'\t')[1] as department,
+split(value,'\t')[2] as brand,
+split(value,'\t')[3] as commodity_desc,
+split(value,'\t')[4] as sub_commodity_desc
+from futurecart_product_details """)
+
+val futurecart_product_details2 = futurecart_product_details.selectExpr("cast(product_id as integer) product_id", "department", "brand", "commodity_desc", "sub_commodity_desc")
+
+futurecart_survey_question_details
+====================================
+question_id     question_desc   response_type   range   negative_response_range neutral_response_range  positive_response_range
+Q1      How would you rate your overall experience with the customer support process?   Scale   1-10    1-4     5-7     8-10
+
+/user/edureka_918210/project_futurecart/batchdata/futurecart_survey_question_details.txt
+
+spark.read.textFile("/user/edureka_918210/project_futurecart/batchdata/futurecart_survey_question_details.txt").createOrReplaceTempView("futurecart_survey_question_details");
+
+val futurecart_survey_question_details = 
+spark.sql(""" Select 
+split(value,'\t')[0] as question_id,
+split(value,'\t')[1] as question_desc,
+split(value,'\t')[2] as response_type,
+split(value,'\t')[3] as range,
+split(value,'\t')[4] as negative_response_range,
+split(value,'\t')[5] as neutral_response_range,
+split(value,'\t')[6] as positive_response_range
+from futurecart_survey_question_details """)
+
+val futurecart_survey_question_details2 = futurecart_survey_question_details.selectExpr("question_id", "question_desc", "response_type", "range", "negative_response_range", "neutral_response_range", "positive_response_range")
+
+
+TO SAVE THE SPARK DATAFRAME INTO MYSQL : the mysql connector jar file is downloaded and connected.
+=====================================================================================================
+
+spark2-shell --jars /mnt/home/edureka_918210/project_retailcart/connector_jars/mysql-connector-java-5.1.48-bin.jar
+
+futurecart_calendar2.write.format("jdbc").option("url","jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database").option("dbtable","futurecart_calendar2").option("user","edu_labuser").option("password","edureka").option("driver","com.mysql.jdbc.Driver").mode("overwrite").save
+
+futurecart_call_center_details2.write.format("jdbc").option("url","jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database").option("dbtable","futurecart_call_center_details2").option("user","edu_labuser").option("password","edureka").option("driver","com.mysql.jdbc.Driver").mode("overwrite").save
+
+futurecart_case_category_details2.write.format("jdbc").option("url","jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database").option("dbtable","futurecart_case_category_details2").option("user","edu_labuser").option("password","edureka").option("driver","com.mysql.jdbc.Driver").mode("overwrite").save
+
+futurecart_case_country_details2.write.format("jdbc").option("url","jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database").option("dbtable","futurecart_case_country_details2").option("user","edu_labuser").option("password","edureka").option("driver","com.mysql.jdbc.Driver").mode("overwrite").save
+
+futurecart_case_details2.write.format("jdbc").option("url","jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database").option("dbtable","futurecart_case_details2").option("user","edu_labuser").option("password","edureka").option("driver","com.mysql.jdbc.Driver").mode("overwrite").save
+
+futurecart_case_priority_details2.write.format("jdbc").option("url","jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database").option("dbtable","futurecart_case_priority_details2").option("user","edu_labuser").option("password","edureka").option("driver","com.mysql.jdbc.Driver").mode("overwrite").save
+
+futurecart_case_survey_details2.write.format("jdbc").option("url","jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database").option("dbtable","futurecart_case_survey_details2").option("user","edu_labuser").option("password","edureka").option("driver","com.mysql.jdbc.Driver").mode("overwrite").save
+
+futurecart_employee_details2.write.format("jdbc").option("url","jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database").option("dbtable","futurecart_employee_details2").option("user","edu_labuser").option("password","edureka").option("driver","com.mysql.jdbc.Driver").mode("overwrite").save
+
+futurecart_product_details2.write.format("jdbc").option("url","jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database").option("dbtable","futurecart_product_details2").option("user","edu_labuser").option("password","edureka").option("driver","com.mysql.jdbc.Driver").mode("overwrite").save
+
+futurecart_survey_question_details2.write.format("jdbc").option("url","jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database").option("dbtable","futurecart_survey_question_details2").option("user","edu_labuser").option("password","edureka").option("driver","com.mysql.jdbc.Driver").mode("overwrite").save
+
+
+mysql -u edu_labuser -h dbserver.edu.cloudlab.com -p
+
+password - edureka
+
+CREATE TABLE futurecart_calendar_details SELECT * FROM futurecart_calendar2;
+CREATE TABLE futurecart_call_center_details SELECT * FROM futurecart_call_center_details2;
+CREATE TABLE futurecart_case_category_details SELECT * FROM futurecart_case_category_details2;
+CREATE TABLE futurecart_case_country_details SELECT * FROM futurecart_case_country_details2;
+CREATE TABLE futurecart_case_details SELECT * FROM futurecart_case_details2;
+CREATE TABLE futurecart_case_priority_details SELECT * FROM futurecart_case_priority_details2;
+CREATE TABLE futurecart_case_survey_details SELECT * FROM futurecart_case_survey_details2;
+CREATE TABLE futurecart_employee_details SELECT * FROM futurecart_employee_details2;
+CREATE TABLE futurecart_product_details SELECT * FROM futurecart_product_details2;
+CREATE TABLE futurecart_survey_question_details SELECT * FROM futurecart_survey_question_details2;
+
+*******************************************************************************************************************************************
+*******************************************************************************************************************************************
+
+DB Details :edureka_918210_DB_Industry_projects_futurecart 
+
+    > create database edureka_918210_DB_Industry_projects_futurecart;
+
+    > 
+    > use edureka_918210_DB_Industry_projects_futurecart;
+
+================================================================
+MYSQL TO HIVE
+================
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database  --table futurecart_calendar_details -m 2 --hive-import --username edu_labuser  --hive-database edureka_918210_DB_Industry_projects_futurecart --split-by calendar_date --password edureka
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database  --table futurecart_call_center_details -m 2 --hive-import --username edu_labuser  --hive-database edureka_918210_DB_Industry_projects_futurecart --split-by call_center_id --password edureka
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database  --table futurecart_case_category_details -m 2 --hive-import --username edu_labuser  --hive-database edureka_918210_DB_Industry_projects_futurecart --split-by sub_category_key --password edureka
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database  --table futurecart_case_country_details -m 2 --hive-import --username edu_labuser  --hive-database edureka_918210_DB_Industry_projects_futurecart --split-by id --password edureka
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database  --table futurecart_case_details -m 2 --hive-import --username edu_labuser  --hive-database edureka_918210_DB_Industry_projects_futurecart --split-by case_no --password edureka
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database  --table futurecart_case_priority_details -m 2 --hive-import --username edu_labuser  --hive-database edureka_918210_DB_Industry_projects_futurecart --split-by priority_key --password edureka
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database  --table futurecart_case_survey_details -m 2 --hive-import --username edu_labuser  --hive-database edureka_918210_DB_Industry_projects_futurecart --split-by survey_id --password edureka
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database  --table futurecart_employee_details -m 2 --hive-import --username edu_labuser  --hive-database edureka_918210_DB_Industry_projects_futurecart --split-by emp_key --password edureka
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database  --table futurecart_product_details -m 2 --hive-import --username edu_labuser  --hive-database edureka_918210_DB_Industry_projects_futurecart --split-by product_id --password edureka
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database  --table futurecart_survey_question_details -m 2 --hive-import --username edu_labuser  --hive-database edureka_918210_DB_Industry_projects_futurecart --split-by question_id --password edureka
+
+
+
+
+SPARK TO Hive
+=================
+val spark = SparkSession.builder().appName("Industry_Grade_Project-spark").master("local[*]").enableHiveSupport().getOrCreate();
+spark.sql("Show tables in edureka_918210_DB_Industry_projects_futurecart").show(false)
+
+scala> spark.sql("Show tables in edureka_918210_DB_Industry_projects_futurecart").show(false)
++----------------------------------------------+----------------------------------+-----------+
+|database                                      |tableName                         |isTemporary|
++----------------------------------------------+----------------------------------+-----------+
+|edureka_918210_db_industry_projects_futurecart|futurecart_calendar_details       |false      |
+|edureka_918210_db_industry_projects_futurecart|futurecart_call_center_details    |false      |
+|edureka_918210_db_industry_projects_futurecart|futurecart_case_category_details  |false      |
+|edureka_918210_db_industry_projects_futurecart|futurecart_case_country_details   |false      |
+|edureka_918210_db_industry_projects_futurecart|futurecart_case_details           |false      |
+|edureka_918210_db_industry_projects_futurecart|futurecart_case_priority_details  |false      |
+|edureka_918210_db_industry_projects_futurecart|futurecart_case_survey_details    |false      |
+|edureka_918210_db_industry_projects_futurecart|futurecart_employee_details       |false      |
+|edureka_918210_db_industry_projects_futurecart|futurecart_product_details        |false      |
+|edureka_918210_db_industry_projects_futurecart|futurecart_survey_question_details|false      |
++----------------------------------------------+----------------------------------+-----------+
+scala> 
+scala> 
+
+***************************************************************************************************************************************************
+
+REAL TIME  DATA
+==================
+hdfs dfs -get /bigdatapgp/common_folder/project_futurecart/realtimedata
+
+python2 realtimedata/realtime_simulator.py --outputLocation /mnt/home/edureka_918210/project_retailcart/realtimedata
+
+LOCATION :
+==================
+/mnt/home/edureka_918210/project_futurecart/realtimedata/case - File Location
+
+
+spark2-shell --jars /mnt/home/edureka_918210/edureka_918210_retailcart/connector_jars/mysql-connector-java-5.1.48-bin.jar
+
+val spark = SparkSession.builder().appName("Industry_Grade_Project-spark").master("local[*]").enableHiveSupport().getOrCreate();
+
+val RealTimeDFCase = spark.read.json("/user/edureka_918210/project_futurecart/realtimedata/case")
+RealTimeDFCase: org.apache.spark.sql.DataFrame = [call_center_id: string, case_no: string ... 9 more fields]
+scala> 
+
+scala> RealTimeDFCase.printSchema
+root
+ |-- call_center_id: string (nullable = true)
+ |-- case_no: string (nullable = true)
+ |-- category: string (nullable = true)
+ |-- communication_mode: string (nullable = true)
+ |-- country_cd: string (nullable = true)
+ |-- create_timestamp: string (nullable = true)
+ |-- created_employee_key: string (nullable = true)
+ |-- last_modified_timestamp: string (nullable = true)
+ |-- product_code: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- sub_category: string (nullable = true)
+scala> 
+
+scala> RealTimeDFCase.show(4)
++--------------+-------+--------+------------------+----------+-------------------+--------------------+-----------------------+------------+------+------------+
+|call_center_id|case_no|category|communication_mode|country_cd|   create_timestamp|created_employee_key|last_modified_timestamp|product_code|status|sub_category|
++--------------+-------+--------+------------------+----------+-------------------+--------------------+-----------------------+------------+------+------------+
+|         C-123| 600901|    CAT3|              Chat|        PN|2021-01-14 21:05:24|              263886|    2021-01-14 21:05:24|    13164066|  Open|       SCAT9|
+|         C-125| 600902|    CAT3|              Call|        TF|2021-01-14 21:05:24|              406314|    2021-01-14 21:05:24|    10149940|  Open|       SCAT9|
+|         C-119| 600903|    CAT3|              Call|        BO|2021-01-14 21:05:24|              401883|    2021-01-14 21:05:24|     2254829|  Open|       SCAT9|
+|         C-116| 600904|    CAT3|             Email|        GL|2021-01-14 21:05:24|               39803|    2021-01-14 21:05:24|     1895883|  Open|       SCAT9|
++--------------+-------+--------+------------------+----------+-------------------+--------------------+-----------------------+------------+------+------------+
+only showing top 4 rows
+
+RealTimeDFCase.write.format("jdbc").option("url","jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database").option("dbtable","RealTimeDFCase").option("user","edu_labuser").option("password","edureka").option("driver","com.mysql.jdbc.Driver").mode("overwrite").save
+
+
+mysql -u edu_labuser -h dbserver.edu.cloudlab.com -p
+
+MySQL [labuser_database]> describe RealTimeDFCase;
++-------------------------+------+------+-----+---------+-------+
+| Field                   | Type | Null | Key | Default | Extra |
++-------------------------+------+------+-----+---------+-------+
+| call_center_id          | text | YES  |     | NULL    |       |
+| case_no                 | text | YES  |     | NULL    |       |
+| category                | text | YES  |     | NULL    |       |
+| communication_mode      | text | YES  |     | NULL    |       |
+| country_cd              | text | YES  |     | NULL    |       |
+| create_timestamp        | text | YES  |     | NULL    |       |
+| created_employee_key    | text | YES  |     | NULL    |       |
+| last_modified_timestamp | text | YES  |     | NULL    |       |
+| product_code            | text | YES  |     | NULL    |       |
+| status                  | text | YES  |     | NULL    |       |
+| sub_category            | text | YES  |     | NULL    |       |
++-------------------------+------+------+-----+---------+-------+
+11 rows in set (0.00 sec)
+MySQL [labuser_database]> 
+MySQL [labuser_database]> 
+
+
+***********************************************************************************************************************************************************************
+
+val RealTimeDFsurvey = spark.read.json("/user/edureka_918210/project_futurecart/realtimedata/survey")
+
+RealTimeDFsurvey.write.format("jdbc").option("url","jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database").option("dbtable","RealTimeDFsurvey").option("user","edu_labuser").option("password","edureka").option("driver","com.mysql.jdbc.Driver").mode("overwrite").save
+
+MySQL [labuser_database]> describe RealTimeDFsurvey;
++------------------+------------+------+-----+---------+-------+
+| Field            | Type       | Null | Key | Default | Extra |
++------------------+------------+------+-----+---------+-------+
+| Q1               | bigint(20) | YES  |     | NULL    |       |
+| Q2               | bigint(20) | YES  |     | NULL    |       |
+| Q3               | bigint(20) | YES  |     | NULL    |       |
+| Q4               | text       | YES  |     | NULL    |       |
+| Q5               | bigint(20) | YES  |     | NULL    |       |
+| case_no          | text       | YES  |     | NULL    |       |
+| survey_id        | text       | YES  |     | NULL    |       |
+| survey_timestamp | text       | YES  |     | NULL    |       |
++------------------+------------+------+-----+---------+-------+
+8 rows in set (0.00 sec)
+MySQL [labuser_database]> 
+MySQL [labuser_database]> 
+
+
+hive tables from mysql
+================================================================
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database \
+--username edu_labuser \
+--P \
+--split-by survey_id \
+--columns Q1,Q2,Q3,Q4,Q5,case_no,survey_id,survey_timestamp \
+--table RealTimeDFsurvey \
+--target-dir /user/edureka_918210/project_futurecart/RealTimeDFsurvey \
+--fields-terminated-by "," \
+--hive-import \
+--create-hive-table \
+--hive-table edureka_918210_DB_Industry_projects_futurecart.RealTimeDFsurvey
+
+
+
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database \
+--username edu_labuser \
+--P \
+--split-by call_center_id \
+--columns call_center_id,case_no,category,communication_mode,country_cd,create_timestamp,created_employee_key,last_modified_timestamp,product_code,status,sub_category \
+--table RealTimeDFCase \
+--target-dir /user/edureka_918210/project_futurecart/RealTimeDFCase \
+--fields-terminated-by "," \
+--hive-import \
+--create-hive-table \
+--hive-table edureka_918210_DB_Industry_projects_futurecart.RealTimeDFCase
+
+/user/edureka_918210/project_futurecart/RealTimeDFsurvey  --  HDFS location
+/user/edureka_918210/project_futurecart/RealTimeDFCase  --  HDFS location
+
+spark.sql("select * from edureka_918210_DB_Industry_projects.edureka_918210_retailcart_price_change_events").show(false)
+spark.sql("select * from edureka_918210_DB_Industry_projects.edureka_918210_retailcart_sales_transaction_events").show(false)
+
+
+MYSQL TO HBase
+================
+
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database --table  RealTimeDFCase  --hbase-table 'RealTimeDFCase' --column-family cf2 --username edu_labuser   --hbase-create-table --columns call_center_id,case_no,category,communication_mode,country_cd,create_timestamp,created_employee_key,last_modified_timestamp,product_code,status,sub_category --hbase-row-key call_center_id -m 1 --password edureka
+
+sqoop import --connect jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database --table RealTimeDFsurvey --hbase-table 'RealTimeDFsurvey' --column-family cf2 --username edu_labuser   --hbase-create-table --columns Q1,Q2,Q3,Q4,Q5,case_no,survey_id,survey_timestamp --hbase-row-key survey_id -m 1 --password edureka
+
+
+
+KPIs (Both on real-time data and batch-processed data)
+======================================================
+• Total numbers of cases
+• Total open cases in the last 1 hour
+• Total closed cases in the last 1 hour
+• Total priority cases
+4
+• Total positive/negative responses in the last 1 hour
+• Total number of surveys in the last 1 hour
+• Total open cases in a day/week/month
+• Total closed cases in a day/week/month
+• Total positive/negative responses in a day/week/month
+• Total number of surveys in a day/week/month
+Real-time KPIs
+• Total numbers of cases that are open and closed out of the number of cases received
+• Total number of cases received based on priority and severity
+
+
+
+val futurecart_calendar_details = spark.sql("select * from edureka_918210_DB_Industry_projects_futurecart.futurecart_calendar_details")
+val futurecart_call_center_details = spark.sql("select * from edureka_918210_DB_Industry_projects_futurecart.futurecart_call_center_details")
+val futurecart_case_category_details = spark.sql("select * from edureka_918210_DB_Industry_projects_futurecart.futurecart_case_category_details")
+val futurecart_case_country_details = spark.sql("select * from edureka_918210_DB_Industry_projects_futurecart.futurecart_case_country_details")
+val futurecart_case_details = spark.sql("select * from edureka_918210_DB_Industry_projects_futurecart.futurecart_case_details")
+val futurecart_case_priority_details = spark.sql("select * from edureka_918210_DB_Industry_projects_futurecart.futurecart_case_priority_details")
+val futurecart_case_survey_details = spark.sql("select * from edureka_918210_DB_Industry_projects_futurecart.futurecart_case_survey_details")
+val futurecart_employee_details = spark.sql("select * from edureka_918210_DB_Industry_projects_futurecart.futurecart_employee_details")
+val futurecart_product_details = spark.sql("select * from edureka_918210_DB_Industry_projects_futurecart.futurecart_product_details")
+val futurecart_survey_question_details = spark.sql("select * from edureka_918210_DB_Industry_projects_futurecart.futurecart_survey_question_details")
+val RealTimeDFCase = spark.sql("select * from edureka_918210_DB_Industry_projects_futurecart.RealTimeDFCase")
+val RealTimeDFsurvey = spark.sql("select * from edureka_918210_DB_Industry_projects_futurecart.RealTimeDFsurvey")
+
+
+
+val RealTimeDFCase2  = RealTimeDFCase.withColumn("date", to_date($"last_modified_timestamp")).withColumn("hour", hour(col("last_modified_timestamp"))).withColumn("minute", minute(col("last_modified_timestamp"))).withColumn("second", second(col("last_modified_timestamp")))
+
+scala> RealTimeDFCase2.printSchema
+root
+ |-- call_center_id: string (nullable = true)
+ |-- case_no: string (nullable = true)
+ |-- category: string (nullable = true)
+ |-- communication_mode: string (nullable = true)
+ |-- country_cd: string (nullable = true)
+ |-- create_timestamp: string (nullable = true)
+ |-- created_employee_key: string (nullable = true)
+ |-- last_modified_timestamp: string (nullable = true)
+ |-- product_code: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- sub_category: string (nullable = true)
+ |-- date: date (nullable = true)
+ |-- hour: integer (nullable = true)
+ |-- minute: integer (nullable = true)
+ |-- second: integer (nullable = true)
+
+val RealTimeDFCase3 = RealTimeDFCase2.orderBy(desc("hour")).select("call_center_id","case_no","country_cd","status","date","hour","minute","second")
+
+Total Open cases in the last 1 hour
+=========================================
+RealTimeDFCase3.filter((RealTimeDFCase3("status")==="Open") && (RealTimeDFCase3("hour") === 21) && (RealTimeDFCase3("minute").between(0,59))).show(10)
+
+scala> RealTimeDFCase3.filter((RealTimeDFCase3("status")==="Open") && (RealTimeDFCase3("hour") === 21) && (RealTimeDFCase3("minute").between(0,59))).count()
+res1: Long = 100                                                                
+
+
+Total closed cases in the last 1 hour
+=========================================
+RealTimeDFCase3.filter((RealTimeDFCase3("status")==="Closed") && (RealTimeDFCase3("hour") === 21) && (RealTimeDFCase3("minute").between(0,59))).show(10)
+
+
+
+scala> RealTimeDFCase3.filter((RealTimeDFCase3("status")==="Closed") && (RealTimeDFCase3("hour") === 21) && (RealTimeDFCase3("minute").between(0,59))).count()
+res3: Long = 7
+scala> 
+
+
+Total priority cases 4
+============================
+
+futurecart_case_priority_details.show(5)
+
+scala> futurecart_case_priority_details.filter((futurecart_case_priority_details("priority_key")==="P4")).count()
+res6: Long = 1                                                                  
+scala> 
+
+Total positive/negative responses in the last 1 hour
+=======================================================
+
+scala> futurecart_survey_question_details.show(10)
++-----------+--------------------+-------------+-----+-----------------------+----------------------+-----------------------+
+|question_id|       question_desc|response_type|range|negative_response_range|neutral_response_range|positive_response_range|
++-----------+--------------------+-------------+-----+-----------------------+----------------------+-----------------------+
+|         Q1|How would you rat...|        Scale| 1-10|                    1-4|                   5-7|                   8-10|
+|         Q2|How would you rat...|        Scale| 1-10|                    1-5|                   6-8|                   9-10|
+|         Q3|How would you rat...|        Scale| 1-10|                    1-4|                   5-7|                   8-10|
+|         Q4|Was your issue re...|      Options|   NA|                     NA|                    NA|                     NA|
+|         Q5|How likely are yo...|        Scale| 1-10|                    1-5|                   6-8|                   8-10|
+|question_id|       question_desc|response_type|range|   negative_response...|  neutral_response_...|   positive_response...|
++-----------+--------------------+-------------+-----+-----------------------+----------------------+-----------------------+
+scala> RealTimeDFsurvey.printSchema
+root
+ |-- q1: long (nullable = true)
+ |-- q2: long (nullable = true)
+ |-- q3: long (nullable = true)
+ |-- q4: string (nullable = true)
+ |-- q5: long (nullable = true)
+ |-- case_no: string (nullable = true)
+ |-- survey_id: string (nullable = true)
+ |-- survey_timestamp: string (nullable = true)
+scala> RealTimeDFsurvey.show(10)
++---+---+---+---+---+-------+---------+-------------------+
+| q1| q2| q3| q4| q5|case_no|survey_id|   survey_timestamp|
++---+---+---+---+---+-------+---------+-------------------+
+|  4|  7|  6|  N|  1| 600901| S-500000|2021-01-14 22:05:24|
+|  4|  3|  2|  N|  5| 600902| S-500001|2021-01-14 22:05:24|
+|  9|  9|  8|  N|  9| 600903| S-500002|2021-01-14 22:05:24|
+|  2|  9|  9|  Y|  2| 600904| S-500003|2021-01-14 22:05:24|
+| 10|  8|  5|  Y|  9| 600905| S-500004|2021-01-14 22:05:24|
+|  1| 10|  2|  Y|  7| 600906| S-500005|2021-01-14 22:05:24|
+|  3|  7|  2|  Y| 10| 600911| S-500006|2021-01-14 22:05:34|
+|  8|  3|  8|  N|  5| 600912| S-500007|2021-01-14 22:05:34|
+|  7|  7|  6|  Y|  5| 600913| S-500008|2021-01-14 22:05:34|
+|  2|  5|  3|  N|  1| 600914| S-500009|2021-01-14 22:05:34|
++---+---+---+---+---+-------+---------+-------------------+
+only showing top 10 rows
+
+
+val RealTimeDFsurvey2 = RealTimeDFsurvey.withColumn("Positive_NegativeQ1", when(col("q1").isin("1", "4"), "Negative").otherwise(when(col("q1").isin("5", "7"), "Positive").otherwise("Neutral")))
+val RealTimeDFsurvey3 = RealTimeDFsurvey2.withColumn("Positive_NegativeQ2", when(col("q2").isin("1", "5"), "Negative").otherwise(when(col("q2").isin("6", "8"), "Positive").otherwise("Neutral")))
+val RealTimeDFsurvey4 = RealTimeDFsurvey3.withColumn("Positive_NegativeQ3", when(col("q3").isin("1", "4"), "Negative").otherwise(when(col("q3").isin("5", "7"), "Positive").otherwise("Neutral")))
+val RealTimeDFsurvey5 = RealTimeDFsurvey4.withColumn("Positive_NegativeQ4", when(col("q4").isin("1", "4"), "NA").otherwise(when(col("q4").isin("5", "7"), "NA").otherwise("NA")))
+val RealTimeDFsurvey6 = RealTimeDFsurvey4.withColumn("Positive_NegativeQ5", when(col("q5").isin("1", "5"), "Negative").otherwise(when(col("q5").isin("6", "8"), "Positive").otherwise("NA")))
+
+Total number of surveys in the last 1 hour
+===============================================
+
+RealTimeDFsurvey.count()
+
+Total open cases in the last 1 hour
+=======================================
+val RealTimeDFCase2  = RealTimeDFCase.withColumn("date", to_date($"last_modified_timestamp")).withColumn("hour", hour(col("last_modified_timestamp"))).withColumn("minute", minute(col("last_modified_timestamp"))).withColumn("second", second(col("last_modified_timestamp")))
+
+val RealTimeDFCase3 = RealTimeDFCase2.orderBy(desc("hour")).select("call_center_id","case_no","country_cd","status","date","hour","minute","second")
+RealTimeDFCase3.filter(RealTimeDFCase3("status")==="Open").show(10)
+
+scala> RealTimeDFCase3.filter((RealTimeDFCase3("status")==="Open") && (RealTimeDFCase3("hour") === 21) && (RealTimeDFCase3("minute").between(0,59))).count()
+res1: Long = 100                                                                
+
+RealTimeDFCase3.filter((RealTimeDFCase3("status")==="Open") && (RealTimeDFCase3("hour") === 21) && (RealTimeDFCase3("minute").between(0,59))).show(10)
+
+Total closed cases in the last 1 hour
+===========================================
+RealTimeDFCase3.filter((RealTimeDFCase3("status")==="Closed") && (RealTimeDFCase3("hour") === 21) && (RealTimeDFCase3("minute").between(0,59))).show(10)
+
+
+scala> RealTimeDFCase3.filter((RealTimeDFCase3("status")==="Closed") && (RealTimeDFCase3("hour") === 21) && (RealTimeDFCase3("minute").between(0,59))).count()
+res3: Long = 7
+scala> 
+
+Total priority cases 4
+scala> futurecart_case_priority_details.filter((futurecart_case_priority_details("priority_key")==="P4")).count()
+res6: Long = 1 scala>
+
+Total positive/negative responses in the last 1 hour
+======================================================
+val RealTimeDFsurvey2 = RealTimeDFsurvey.withColumn("Positive_NegativeQ1", when(col("q1").isin("1", "4"), "Negative").otherwise(when(col("q1").isin("5", "7"), "Positive").otherwise("Neutral")))
+val RealTimeDFsurvey3 = RealTimeDFsurvey2.withColumn("Positive_NegativeQ2", when(col("q2").isin("1", "5"), "Negative").otherwise(when(col("q2").isin("6", "8"), "Positive").otherwise("Neutral")))
+val RealTimeDFsurvey4 = RealTimeDFsurvey3.withColumn("Positive_NegativeQ3", when(col("q3").isin("1", "4"), "Negative").otherwise(when(col("q3").isin("5", "7"), "Positive").otherwise("Neutral")))
+val RealTimeDFsurvey5 = RealTimeDFsurvey4.withColumn("Positive_NegativeQ4", when(col("q4").isin("1", "4"), "NA").otherwise(when(col("q4").isin("5", "7"), "NA").otherwise("NA")))
+val RealTimeDFsurvey6 = RealTimeDFsurvey4.withColumn("Positive_NegativeQ5", when(col("q5").isin("1", "5"), "Negative").otherwise(when(col("q5").isin("6", "8"), "Positive").otherwise("NA")))
+
+
+Total number of surveys in the last 1 hour
+===============================================
+scala> RealTimeDFsurvey.count()res18: Long = 11 scala>
+Total open cases in a day/week/month
+
+
+ Total opened cases in a day/week/month
+ =======================================
+ 
+scala> futurecart_case_details.printSchema
+root
+ |-- case_no: integer (nullable = true)
+ |-- create_timestamp: string (nullable = true)
+ |-- last_modified_timestamp: string (nullable = true)
+ |-- created_employee_key: integer (nullable = true)
+ |-- call_center_id: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- category: string (nullable = true)
+ |-- sub_category: string (nullable = true)
+ |-- communication_mode: string (nullable = true)
+ |-- country_cd: string (nullable = true)
+ |-- product_code: string (nullable = true)
+scala> futurecart_case_details.count()
+res4: Long = 808265   
+
+val futurecart_case_details2  = futurecart_case_details.withColumn("date", to_date($"last_modified_timestamp")).withColumn("month", month(col("last_modified_timestamp"))).withColumn("day", day(col("last_modified_timestamp")))
+
+
+scala> futurecart_case_details2.printSchema
+root
+ |-- case_no: integer (nullable = true)
+ |-- create_timestamp: string (nullable = true)
+ |-- last_modified_timestamp: string (nullable = true)
+ |-- created_employee_key: integer (nullable = true)
+ |-- call_center_id: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- category: string (nullable = true)
+ |-- sub_category: string (nullable = true)
+ |-- communication_mode: string (nullable = true)
+ |-- country_cd: string (nullable = true)
+ |-- product_code: string (nullable = true)
+ |-- date: date (nullable = true)
+ |-- month: integer (nullable = true)
+  |-- day: integer (nullable = true)
+  
+futurecart_case_details2.filter((futurecart_case_details2("status")==="Open").groupBy("month") 
+futurecart_case_details2.filter((futurecart_case_details2("status")==="Open").groupBy("day") 
+
+
+ Total closed cases in a day/week/month
+ =======================================
+
+scala> futurecart_case_details2.printSchema
+root
+ |-- case_no: integer (nullable = true)
+ |-- create_timestamp: string (nullable = true)
+ |-- last_modified_timestamp: string (nullable = true)
+ |-- created_employee_key: integer (nullable = true)
+ |-- call_center_id: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- category: string (nullable = true)
+ |-- sub_category: string (nullable = true)
+ |-- communication_mode: string (nullable = true)
+ |-- country_cd: string (nullable = true)
+ |-- product_code: string (nullable = true)
+ |-- date: date (nullable = true)
+ |-- month: integer (nullable = true)
+
+import org.apache.spark.sql.functions._
+
+futurecart_case_details2.filter((futurecart_case_details2("status")==="Closed").groupBy("month")
+futurecart_case_details2.filter((futurecart_case_details2("status")==="Closed").groupBy("day")  
+
+Total positive/negative responses in a day/week/month
+ =============================================================
+ 
+ RealTimeDFsurvey6.filter(("Positive_NegativeQ1")==="Positive").count().groupBy("month")
+ RealTimeDFsurvey6.filter(("Positive_NegativeQ1")==="Negative").count().groupBy("month")
+  RealTimeDFsurvey6.filter(("Positive_NegativeQ1")==="Positive").count().groupBy("day")
+ RealTimeDFsurvey6.filter(("Positive_NegativeQ1")==="Negative").count().groupBy("day")
+ 
+  RealTimeDFsurvey6.filter(("Positive_NegativeQ2")==="Positive").count().groupBy("month")
+ RealTimeDFsurvey6.filter(("Positive_NegativeQ2")==="Negative").count().groupBy("month")
+  RealTimeDFsurvey6.filter(("Positive_NegativeQ2")==="Positive").count().groupBy("day")
+ RealTimeDFsurvey6.filter(("Positive_NegativeQ2")==="Negative").count().groupBy("day")
+ 
+  RealTimeDFsurvey6.filter(("Positive_NegativeQ3")==="Positive").count().groupBy("month")
+ RealTimeDFsurvey6.filter(("Positive_NegativeQ3")==="Negative").count().groupBy("month")
+  RealTimeDFsurvey6.filter(("Positive_NegativeQ3")==="Positive").count().groupBy("day")
+ RealTimeDFsurvey6.filter(("Positive_NegativeQ3")==="Negative").count().groupBy("day")
+ 
+ 
+Total number of surveys in a day/week/month
+ ============================================
+
+scala> futurecart_case_details2.printSchema
+root
+ |-- case_no: integer (nullable = true)
+ |-- create_timestamp: string (nullable = true)
+ |-- last_modified_timestamp: string (nullable = true)
+ |-- created_employee_key: integer (nullable = true)
+ |-- call_center_id: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- category: string (nullable = true)
+ |-- sub_category: string (nullable = true)
+ |-- communication_mode: string (nullable = true)
+ |-- country_cd: string (nullable = true)
+ |-- product_code: string (nullable = true)
+ |-- date: date (nullable = true)
+ |-- month: integer (nullable = true)
+ 
+futurecart_case_details2.filter((futurecart_case_details2("case_no").count()).groupBy("month")
+futurecart_case_details2.filter((futurecart_case_details2("case_no").count()).groupBy("day")  
+
