@@ -1,0 +1,371 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<!-- build 20201.20.0219.0753                               -->
+<workbook original-version='18.1' source-build='2020.1.0 (20201.20.0219.0753)' source-platform='win' version='18.1' xmlns:user='http://www.tableausoftware.com/xml/user'>
+  <document-format-change-manifest>
+    <_.fcp.MarkAnimation.true...MarkAnimation />
+    <SheetIdentifierTracking />
+    <WindowsPersistSimpleIdentifiers />
+  </document-format-change-manifest>
+  <preferences>
+    <preference name='ui.encoding.shelf.height' value='24' />
+    <preference name='ui.shelf.height' value='26' />
+  </preferences>
+  <datasources>
+    <datasource caption='sales_results' inline='true' name='federated.0n4dqpu1siz2kt14sdk4h1828xav' version='18.1'>
+      <connection class='federated'>
+        <named-connections>
+          <named-connection caption='sales_results' name='textscan.0jxkz5q023xwka1dm6a9u17wwp4u'>
+            <connection class='textscan' directory='F:/SPARK ML/predict_future_sales' filename='predict_future_sales.json' password='' server='' />
+          </named-connection>
+        </named-connections>
+        <relation connection='textscan.0jxkz5q023xwka1dm6a9u17wwp4u' name='predict_future_sales.json' table='[predict_future_sales.json]' type='table'>
+          <columns character-set='UTF-8' header='yes' locale='en_IN' separator=','>
+            <column datatype='string' name='{&quot;shop_id&quot;:25.0' ordinal='0' />
+            <column datatype='string' name='&quot;item_id&quot;:392.0' ordinal='1' />
+            <column datatype='string' name='&quot;features&quot;:{&quot;type&quot;:1' ordinal='2' />
+            <column datatype='string' name='&quot;values&quot;:(25.0' ordinal='3' />
+            <column datatype='string' name='392.0)}' ordinal='4' />
+            <column datatype='string' name='&quot;label&quot;:1.0' ordinal='5' />
+            <column datatype='string' name='&quot;prediction&quot;:0.997044}' ordinal='6' />
+          </columns>
+        </relation>
+        <metadata-records>
+          <metadata-record class='capability'>
+            <remote-name />
+            <remote-type>0</remote-type>
+            <parent-name>[predict_future_sales.json]</parent-name>
+            <remote-alias />
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype='string' name='character-set'>&quot;UTF-8&quot;</attribute>
+              <attribute datatype='string' name='collation'>&quot;en_GB&quot;</attribute>
+              <attribute datatype='string' name='currency'>&quot;Rs&quot;</attribute>
+              <attribute datatype='string' name='debit-close-char'>&quot;&quot;</attribute>
+              <attribute datatype='string' name='debit-open-char'>&quot;&quot;</attribute>
+              <attribute datatype='string' name='field-delimiter'>&quot;,&quot;</attribute>
+              <attribute datatype='string' name='header-row'>&quot;true&quot;</attribute>
+              <attribute datatype='string' name='locale'>&quot;en_IN&quot;</attribute>
+              <attribute datatype='string' name='quote-char'>&quot;&quot;</attribute>
+              <attribute datatype='string' name='single-char'>&quot;&quot;</attribute>
+            </attributes>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>{&quot;shop_id&quot;:25.0</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[{&quot;shop_id&quot;:25.0]</local-name>
+            <parent-name>[predict_future_sales.json]</parent-name>
+            <remote-alias>{&quot;shop_id&quot;:25.0</remote-alias>
+            <ordinal>0</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RGB' />
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>&quot;item_id&quot;:392.0</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[&quot;item_id&quot;:392.0]</local-name>
+            <parent-name>[predict_future_sales.json]</parent-name>
+            <remote-alias>&quot;item_id&quot;:392.0</remote-alias>
+            <ordinal>1</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RGB' />
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>&quot;features&quot;:{&quot;type&quot;:1</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[&quot;features&quot;:{&quot;type&quot;:1]</local-name>
+            <parent-name>[predict_future_sales.json]</parent-name>
+            <remote-alias>&quot;features&quot;:{&quot;type&quot;:1</remote-alias>
+            <ordinal>2</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RGB' />
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>&quot;values&quot;:(25.0</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[&quot;values&quot;:(25.0]</local-name>
+            <parent-name>[predict_future_sales.json]</parent-name>
+            <remote-alias>&quot;values&quot;:(25.0</remote-alias>
+            <ordinal>3</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RGB' />
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>392.0)}</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[392.0)}]</local-name>
+            <parent-name>[predict_future_sales.json]</parent-name>
+            <remote-alias>392.0)}</remote-alias>
+            <ordinal>4</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RGB' />
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>&quot;label&quot;:1.0</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[&quot;label&quot;:1.0]</local-name>
+            <parent-name>[predict_future_sales.json]</parent-name>
+            <remote-alias>&quot;label&quot;:1.0</remote-alias>
+            <ordinal>5</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RGB' />
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>&quot;prediction&quot;:0.997044}</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[&quot;prediction&quot;:0.997044}]</local-name>
+            <parent-name>[predict_future_sales.json]</parent-name>
+            <remote-alias>&quot;prediction&quot;:0.997044}</remote-alias>
+            <ordinal>6</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RGB' />
+          </metadata-record>
+        </metadata-records>
+      </connection>
+      <aliases enabled='yes' />
+      <column caption='ITEM_ID' datatype='integer' name='[F1]' role='measure' type='quantitative' />
+      <column caption='STORE_ID' datatype='integer' name='[F2]' role='measure' type='quantitative' />
+      <column caption='START_TIME' datatype='datetime' name='[F3]' role='dimension' type='ordinal' />
+      <column caption='END_TIME' datatype='datetime' name='[F4]' role='dimension' type='ordinal' />
+      <column caption='SALES_PRICE' datatype='real' name='[F5]' role='measure' type='quantitative' />
+      <column datatype='integer' name='[Number of Records]' role='measure' type='quantitative' user:auto-column='numrec'>
+        <calculation class='tableau' formula='1' />
+      </column>
+      <column-instance column='[F2]' derivation='Avg' name='[avg:F2:qk]' pivot='key' type='quantitative' />
+      <column-instance column='[F5]' derivation='Avg' name='[avg:F5:qk]' pivot='key' type='quantitative' />
+      <column-instance column='[F1]' derivation='Sum' name='[sum:F1:qk]' pivot='key' type='quantitative' />
+      <column-instance column='[Number of Records]' derivation='Sum' name='[sum:Number of Records:qk]' pivot='key' type='quantitative' />
+      <layout dim-ordering='alphabetic' dim-percentage='0.456432' measure-ordering='alphabetic' measure-percentage='0.543568' show-structure='true' />
+      <style>
+        <style-rule element='mark'>
+          <encoding attr='color' field='[:Measure Names]' type='palette'>
+            <map to='#4e79a7'>
+              <bucket>&quot;[federated.0n4dqpu1siz2kt14sdk4h1828xav].[avg:F1:qk]&quot;</bucket>
+            </map>
+            <map to='#4e79a7'>
+              <bucket>&quot;[federated.0n4dqpu1siz2kt14sdk4h1828xav].[sum:F1:qk]&quot;</bucket>
+            </map>
+            <map to='#76b7b2'>
+              <bucket>&quot;[federated.0n4dqpu1siz2kt14sdk4h1828xav].[avg:F2:qk]&quot;</bucket>
+            </map>
+            <map to='#76b7b2'>
+              <bucket>&quot;[federated.0n4dqpu1siz2kt14sdk4h1828xav].[sum:F2:qk]&quot;</bucket>
+            </map>
+            <map to='#e15759'>
+              <bucket>&quot;[federated.0n4dqpu1siz2kt14sdk4h1828xav].[avg:F5:qk]&quot;</bucket>
+            </map>
+            <map to='#e15759'>
+              <bucket>&quot;[federated.0n4dqpu1siz2kt14sdk4h1828xav].[sum:F5:qk]&quot;</bucket>
+            </map>
+            <map to='#f28e2b'>
+              <bucket>&quot;[federated.0n4dqpu1siz2kt14sdk4h1828xav].[sum:Number of Records:qk]&quot;</bucket>
+            </map>
+          </encoding>
+        </style-rule>
+      </style>
+      <semantic-values>
+        <semantic-value key='[Country].[Name]' value='&quot;India&quot;' />
+      </semantic-values>
+    </datasource>
+  </datasources>
+  <worksheets>
+    <worksheet name='Sheet 2'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='sales_results' name='federated.0n4dqpu1siz2kt14sdk4h1828xav' />
+          </datasources>
+          <datasource-dependencies datasource='federated.0n4dqpu1siz2kt14sdk4h1828xav'>
+            <column datatype='string' name='[&quot;features&quot;:{&quot;type&quot;:1]' role='dimension' type='nominal' />
+            <column datatype='string' name='[&quot;prediction&quot;:0.997044}]' role='dimension' type='nominal' />
+            <column-instance column='[&quot;features&quot;:{&quot;type&quot;:1]' derivation='None' name='[none:&quot;features&quot;:{&quot;type&quot;:1:nk]' pivot='key' type='nominal' />
+            <column-instance column='[&quot;prediction&quot;:0.997044}]' derivation='None' name='[none:&quot;prediction&quot;:0.997044}:nk]' pivot='key' type='nominal' />
+          </datasource-dependencies>
+          <filter class='categorical' column='[federated.0n4dqpu1siz2kt14sdk4h1828xav].[none:&quot;prediction&quot;:0.997044}:nk]'>
+            <groupfilter expression='COUNT([&quot;features&quot;:{&quot;type&quot;:1]) == 0' function='filter' user:ui-filter-by-field='true' user:ui-marker='filter-by'>
+              <groupfilter function='level-members' level='[none:&quot;prediction&quot;:0.997044}:nk]' user:ui-enumeration='all' user:ui-marker='enumerate' />
+            </groupfilter>
+          </filter>
+          <slices>
+            <column>[federated.0n4dqpu1siz2kt14sdk4h1828xav].[none:&quot;prediction&quot;:0.997044}:nk]</column>
+          </slices>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Automatic' />
+          </pane>
+        </panes>
+        <rows>[federated.0n4dqpu1siz2kt14sdk4h1828xav].[none:&quot;prediction&quot;:0.997044}:nk]</rows>
+        <cols>[federated.0n4dqpu1siz2kt14sdk4h1828xav].[none:&quot;features&quot;:{&quot;type&quot;:1:nk]</cols>
+      </table>
+      <simple-id uuid='{CE22F2A9-F95D-4161-9922-74B9401E232F}' />
+    </worksheet>
+    <worksheet name='Sheet 3'>
+      <table>
+        <view>
+          <datasources />
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Automatic' />
+          </pane>
+        </panes>
+        <rows />
+        <cols />
+      </table>
+      <simple-id uuid='{80C8D86D-0409-46EC-8FC8-98F92607B407}' />
+    </worksheet>
+  </worksheets>
+  <dashboards>
+    <dashboard name='Story 1' type='storyboard'>
+      <style />
+      <size maxheight='964' maxwidth='1016' minheight='964' minwidth='1016' />
+      <zones>
+        <zone h='100000' id='2' type='layout-basic' w='100000' x='0' y='0'>
+          <zone h='98340' id='1' param='vert' removable='false' type='layout-flow' w='98426' x='787' y='830'>
+            <zone h='3423' id='3' type='title' w='98426' x='787' y='830' />
+            <zone h='10477' id='4' is-fixed='true' paired-zone-id='5' removable='false' type='flipboard-nav' w='98426' x='787' y='4253' />
+            <zone h='84440' id='5' paired-zone-id='4' removable='false' type='flipboard' w='98426' x='787' y='14730'>
+              <flipboard active-id='1' nav-type='caption' show-nav-arrows='true'>
+                <story-points>
+                  <story-point captured-sheet='Sheet 2' id='1' />
+                </story-points>
+              </flipboard>
+            </zone>
+          </zone>
+          <zone-style>
+            <format attr='border-color' value='#000000' />
+            <format attr='border-style' value='none' />
+            <format attr='border-width' value='0' />
+            <format attr='margin' value='8' />
+          </zone-style>
+        </zone>
+      </zones>
+      <simple-id uuid='{D970E14B-0A54-40C8-998D-3239A70AA045}' />
+    </dashboard>
+  </dashboards>
+  <windows source-height='30'>
+    <window class='worksheet' maximized='true' name='Sheet 2'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='31'>
+            <card type='title' />
+          </strip>
+        </edge>
+      </cards>
+      <viewpoint>
+        <highlight>
+          <color-one-way>
+            <field>[federated.0n4dqpu1siz2kt14sdk4h1828xav].[none:&quot;features&quot;:{&quot;type&quot;:1:nk]</field>
+            <field>[federated.0n4dqpu1siz2kt14sdk4h1828xav].[none:&quot;prediction&quot;:0.997044}:nk]</field>
+          </color-one-way>
+        </highlight>
+      </viewpoint>
+      <simple-id uuid='{9891D0B9-5EDF-4829-A484-555702E66588}' />
+    </window>
+    <window class='dashboard' name='Story 1'>
+      <viewpoints />
+      <active id='-1' />
+      <simple-id uuid='{4F9F518A-6DAC-4FB4-8CF7-9ACE3227DB40}' />
+    </window>
+    <window class='worksheet' name='Sheet 3'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='31'>
+            <card type='title' />
+          </strip>
+        </edge>
+      </cards>
+      <simple-id uuid='{0DB882AC-4DB9-4AF4-9563-EFE93DC52680}' />
+    </window>
+  </windows>
+  <thumbnails>
+    <thumbnail height='192' name='Story 1' width='192'>
+      iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAACXBIWXMAAA7DAAAOwwHHb6hk
+      AAAD6klEQVR4nO3czYtVdRzH8e+9TtiYScygUTAUMhGEQiqDE2PhgNmDLRzatAjal9Ci/6OF
+      uNBZFJqoRFMRTUpEE4RUG62wB6cIUrBadMeHyCH1XhdFjLiIycmrfV6v1Tlwzo/vWbw5Bw7n
+      NDqdTqcgVLPbA0A3CYBoAiDaFQF8ODlRu8Z31cTkVNXsTH0xfWLeC377+Se1c/frCzYg/Jd6
+      5u58efyHev7Fl2pRderwoX21b+p4jY2N1ZqV/fXOwQ9q7cijdf+KW2r61Jk6cfLnurN/aQ0N
+      DdXRo0fqwTVrq1FVF3uW1qIL57p0OTA/V9wBxrZsrp07ttcbk1M1MrKhhkefqE0j62ri7cl6
+      5tnn6tP3362zp3+qNw9+XKOjD9fJ776qmfOzdezYdDX+WmPVqtV/b8ONbk4AF+uP5u21bdsL
+      9eup76uazfr93G/VbrevOmnooQ112+KeevyxjbVn+8u1ct0j13FkWDjNuZu//PhNvfLqa7Xp
+      ya1VywbqnltP1+EjX9fTW7fUgb27a3jzU7XsjrvqvoHlVVW1pP/eaixeUsMP3P3nErMzNT4+
+      Xu32pdr/1qEuXA7MT+NaXoR99tF7db53oDauX72QM8F1c00BwM3OewCiCYBoAiBazz8fwo2k
+      1WpVq9Xq9hhXGRwc7PYI/4o7ANEEQDQBEE0ARBMA0QRANAEQTQBEEwDRBEA0ARBNAEQTANEE
+      QDQBEE0ARPNBzE2mt7e3+vr6uj3G/4a/QhDNIxDRBEA0ARBNAEQTANEEQDQBEE0ARBMA0QRA
+      NAEQTQBEEwDRBEA0ARBNAEQTANEEQDQBEE0ARBMA0QRANAEQTQBEEwDRBEA0ARBNAEQTANEE
+      QDQBEE0ARBMA0QRANAEQTQBEEwDRBEA0ARBNAEQTANEEQDQBEE0ARBMA0QRANAEQTQBEEwDR
+      BEA0ARBNAEQTANEEQDQBEE0ARBMA0QRANAEQTQBEEwDRBEA0ARBNAEQTANEEQDQBEE0ARBMA
+      0QRANAEQTQBEEwDRBEA0ARBNAEQTANEEQDQBEE0ARBMA0QRANAEQTQBEEwDRBEA0ARBNAEQT
+      ANEEQDQBEE0ARBMA0QRANAEQTQBEEwDRBEA0ARBNAEQTANEEQDQBEE0ARBMA0QRANAEQTQBE
+      EwDRBEA0ARBNAEQTANEEQDQBEE0ARBMA0QRANAEQTQBEEwDRBEA0ARBNAEQTANEEQDQBEE0A
+      RBMA0QRANAEQTQBEEwDRBEA0ARBNAEQTANEEQDQBEE0ARBMA0QRANAEQTQBEEwDRBEA0ARBN
+      AEQTANEEQDQBEE0ARBMA0QRANAEQTQBEEwDRBEA0ARDtMqBZhVh8uLCaAAAAAElFTkSuQmCC
+    </thumbnail>
+  </thumbnails>
+</workbook>
